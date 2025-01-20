@@ -163,7 +163,7 @@ export default function ProjectPage() {
         </div>
       </div>
       {/* Project detail */}
-      <Table></Table>
+      <Table projectID={Number(id)}></Table>
       <Footer></Footer>
       <div className="hidden xl:block absolute overflow-hidden rotate-90 top-[28%] right-[80px] translate-x-2/4">
         <Stack highlightedStack={project.stack}></Stack>

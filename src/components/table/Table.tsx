@@ -1,23 +1,69 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { Typographie } from "@/design/typographie/Typographie";
 
-export const Table = () => {
-  const [activeIndex, setActiveIndex] = useState<number>(0);
+interface TableProps {
+  projectID: number;
+}
 
-  const table = [
-    "Mission",
-    "Challenge",
-    "Processus",
-    "UI Design",
-    "Development",
-    "Results",
-    // Ajoute d'autres éléments si nécessaire
+interface TableData {
+  id: number;
+  mission: string;
+  challenge: string;
+  processus: string;
+  UIDesign: string;
+  development: string;
+  results: string;
+  projectId: number;
+}
+
+export const Table = ({ projectID }: TableProps) => {
+  const [activeIndex, setActiveIndex] = useState<number>(0);
+  const [tables, setTables] = useState<TableData[]>([]);
+
+  const tableKeys = [
+    "mission",
+    "challenge",
+    "processus",
+    "UIDesign",
+    "development",
+    "results",
   ];
 
+  useEffect(() => {
+    const fetchProject = async () => {
+      try {
+        const res = await fetch(`/api/project_detail/${projectID}`);
+        const data = await res.json();
+        setTables(data);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des données :", error);
+      }
+    };
+    fetchProject();
+  }, [projectID]);
+
   const renderContent = () => {
+    if (!tables) {
+      return (
+        <div className="text-bgColors">
+          <Typographie
+            size="h2"
+            balise="span"
+            weight="regular"
+            fontFamily="Fraunces"
+            className="italic text-bgColors dark:text-darkBgColors"
+          >
+            Chargement...
+          </Typographie>
+        </div>
+      );
+    }
+
+    const activeKey = tableKeys[activeIndex];
+
     return (
-      <div className=" text-bgColors">
+      <div className="text-bgColors">
         <Typographie
           size="h2"
           balise="span"
@@ -25,7 +71,11 @@ export const Table = () => {
           fontFamily="Fraunces"
           className="italic text-bgColors dark:text-darkBgColors"
         >
-          {table[activeIndex]}
+          {tables.map((elem, index) => (
+            <div key={index} className="mb-4">
+              {elem[activeKey as keyof TableData] || "Aucune donnée disponible"}
+            </div>
+          ))}
         </Typographie>
       </div>
     );
@@ -44,7 +94,7 @@ export const Table = () => {
           Voici les détails du projet
         </Typographie>
         <div className="flex flex-col w-full">
-          {table.map((elem, index) => (
+          {tableKeys.map((key, index) => (
             <button
               key={index}
               onClick={() => setActiveIndex(index)}
@@ -70,7 +120,7 @@ export const Table = () => {
                 weight={activeIndex === index ? "bold" : "medium"}
                 className="text-bgColors dark:text-darkBgColors uppercase group-hover:font-bold transition-all duration-200 ease-in-out"
               >
-                {elem}
+                {key}
               </Typographie>
             </button>
           ))}
